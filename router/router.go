@@ -49,7 +49,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 
-	poolmgrClient "github.com/fission/fission/poolmgr/client"
+	executorClient "github.com/fission/fission/executor/client"
 	"github.com/fission/fission/tpr"
 )
 
@@ -70,7 +70,7 @@ func serve(port int, httpTriggerSet *HTTPTriggerSet) {
 	http.ListenAndServe(url, handlers.LoggingHandler(os.Stdout, mr))
 }
 
-func Start(port int, poolmgrUrl string) {
+func Start(port int, executorUrl string) {
 	fmap := makeFunctionServiceMap(time.Minute)
 
 	fissionClient, _, err := tpr.MakeFissionClient()
@@ -78,13 +78,14 @@ func Start(port int, poolmgrUrl string) {
 		log.Fatalf("Error connecting to kubernetes API: %v", err)
 	}
 	restClient := fissionClient.GetTprClient()
-	poolmgr := poolmgrClient.MakeClient(poolmgrUrl)
+	executor := executorClient.MakeClient(executorUrl)
 	resolver := makeFunctionReferenceResolver(fissionClient)
 	resolver.Sync(restClient)
 	defer func() {
 		resolver.Stop()
 	}()
-	triggers := makeHTTPTriggerSet(fmap, fissionClient, poolmgr, resolver, restClient)
+	triggers := makeHTTPTriggerSet(fmap, fissionClient, executor, resolver, restClient)
+
 	log.Printf("Starting router at port %v\n", port)
 	serve(port, triggers)
 }
