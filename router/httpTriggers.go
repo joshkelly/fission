@@ -30,7 +30,7 @@ import (
 	k8sCache "k8s.io/client-go/tools/cache"
 
 	"github.com/fission/fission"
-	executorClient "github.com/fission/fission/poolmgr/client"
+	executorClient "github.com/fission/fission/executor/client"
 	"github.com/fission/fission/tpr"
 )
 
